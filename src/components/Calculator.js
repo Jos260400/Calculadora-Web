@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Display from './Display';
 import Button from './Button';
 import './Calculator.css';
@@ -11,13 +11,13 @@ const Calculator = () => {
     const [error, setError] = useState(false);
 
     const handleNumberClick = (number) => {
-        if (error) return; 
+        if (error) return;
         if (displayValue.length >= 9) {
             setDisplayValue('ERROR');
             setError(true);
             return;
         }
-        
+
         if (number === '.' && displayValue.includes('.')) return;
         const newValue = displayValue + number;
         setDisplayValue(newValue);
@@ -25,7 +25,7 @@ const Calculator = () => {
     };
 
     const handleOperatorClick = (operator) => {
-        if (error) return; 
+        if (error) return;
         if (result !== null) {
             setOperator(operator);
             setDisplayValue('');
@@ -39,7 +39,7 @@ const Calculator = () => {
     };
 
     const handleEqualClick = () => {
-        if (error) return; 
+        if (error) return;
         if (operator && currentValue) {
             let newResult;
             switch (operator) {
@@ -84,14 +84,12 @@ const Calculator = () => {
     };
 
     const handleNegativeClick = () => {
-        if (error) return; 
+        if (error) return;
         if (displayValue.includes('-')) {
-            
             const newValue = displayValue.substring(1);
             setDisplayValue(newValue);
             setCurrentValue(newValue);
         } else {
-            
             const newValue = '-' + displayValue;
             setDisplayValue(newValue);
             setCurrentValue(newValue);
@@ -100,9 +98,10 @@ const Calculator = () => {
 
     const handleKeyDown = (event) => {
         const key = event.key;
-        if (/^[0-9+\-*/.=]$/.test(key)) {
-            event.preventDefault(); 
-            const button = document.querySelector(`button[data-key="${key}"]`);
+        if (/^[0-9+\-*/.=C]$/.test(key) || key === 'Enter') {
+            event.preventDefault();
+            const buttonKey = key === 'Enter' ? '=' : key;
+            const button = document.querySelector(`button[data-key="${buttonKey}"]`);
             if (button) {
                 button.click();
                 button.focus();
@@ -110,8 +109,15 @@ const Calculator = () => {
         }
     };
 
+    useEffect(() => {
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+
     return (
-        <div className="calculator" onKeyDown={handleKeyDown} tabIndex="0">
+        <div className="calculator" tabIndex="0">
             <Display value={displayValue || '0'} />
             <div className="buttons">
                 {['7', '8', '9', '+'].map(label => (
